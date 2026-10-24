@@ -3,13 +3,18 @@
 import { useEffect, type CSSProperties } from 'react';
 import BootLoader from './BootLoader';
 import ContactForm from './ContactForm';
-import { CONTACT, FAQS, PROCESS, PROJECTS, SERVICES } from '@/lib/content';
+import { CONTACT, FAQS, PACKAGES, PRICING_NOTES, PROCESS, PROJECTS, SERVICES } from '@/lib/content';
 import { initRetroSite } from '@/lib/engine';
 
 /**
  * The whole page. React renders the markup once; lib/engine.js finds the pieces by id and runs
  * the 3D monitor, the zoom into the screen, the maze game and the CRT transitions.
  */
+/** pre-selects a package in the contact form (components/ContactForm.tsx listens for this) */
+function pickPackage(name: string) {
+  window.dispatchEvent(new CustomEvent('pick-package', { detail: name }));
+}
+
 export default function RetroSite() {
   useEffect(() => {
     const destroy = initRetroSite(PROJECTS);
@@ -52,6 +57,7 @@ export default function RetroSite() {
               <a href="#work" data-go="1" id="navWork">Selected Work</a>
               <a href="#about" data-go="2" id="navAbout">About</a>
               <a href="#services">Services</a>
+              <a href="#pricing">Pricing</a>
               <a href="#contact">Contact</a>
             </nav>
             <div className="call">
@@ -181,6 +187,45 @@ export default function RetroSite() {
             </ol>
             <p className="term-ready" aria-hidden="true">READY.<i className="term-cursor"></i></p>
           </div>
+        </div>
+      </section>
+
+      <section className="sec" id="pricing" aria-labelledby="pricingTitle">
+        <div className="sec-inner">
+          <p className="eyebrow-a reveal">Pricing</p>
+          <h2 className="sec-title reveal" id="pricingTitle">Pick a package, <em>get online</em></h2>
+          <p className="sec-lede reveal">
+            Every package includes an enquiry form that sends messages to your WhatsApp or email, a mobile-first design and
+            3 months of support after launch.
+          </p>
+          <ul className="pkg-grid">
+            {PACKAGES.map((p) => (
+              <li className={`pkg reveal${p.featured ? ' featured' : ''}`} key={p.name} style={{ '--c': p.color } as CSSProperties}>
+                {p.featured && <span className="pkg-flag">RECOMMENDED</span>}
+                <p className="pkg-name">{p.name.toUpperCase()}</p>
+                <p className="pkg-price"><small>from</small>{p.price}</p>
+                <p className="pkg-for">{p.bestFor}</p>
+                <ul className="pkg-feats">
+                  {p.features.map((f) => <li key={f} className={f.startsWith('Everything in') ? 'inc' : undefined}>{f}</li>)}
+                </ul>
+                <p className="pkg-extra">+ hosting &amp; domain, at cost</p>
+                <div className="pkg-cta">
+                  <a className="btn" href="#contact" onClick={() => pickPackage(p.name)}>Choose {p.name}</a>
+                  {CONTACT.whatsapp && (
+                    <a
+                      className="pkg-wa" target="_blank" rel="noreferrer"
+                      href={`https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(`Hi Nived, I'm interested in the ${p.name} package (from ${p.price}) for my business.`)}`}
+                    >or ask on WhatsApp</a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <dl className="pkg-notes reveal">
+            {PRICING_NOTES.map((n) => (
+              <div key={n.title}><dt>{n.title}</dt><dd>{n.body}</dd></div>
+            ))}
+          </dl>
         </div>
       </section>
 

@@ -118,13 +118,84 @@ export const PROCESS: Step[] = [
   { title: 'Launch & support', body: 'I put it live, show your team how to edit it, and stay around for fixes and updates.' },
 ];
 
+export type Package = {
+  name: string;
+  /** starting price, shown as written */
+  price: string;
+  bestFor: string;
+  /** first line is shown highlighted when it starts with "Everything in" */
+  features: string[];
+  color: string;
+  /** gets the highlighted card; set on one package or none */
+  featured?: boolean;
+};
+
+/** Pricing section, from the website proposal. */
+export const PACKAGES: Package[] = [
+  {
+    name: 'Growth',
+    price: '₹15,000',
+    bestFor: 'Best for getting online quickly.',
+    color: '#ff9f43',
+    features: [
+      '3-page website: Home, About and Contact',
+      'Enquiry form to WhatsApp or email',
+      'Mobile-friendly design',
+      'Basic search setup (page titles and descriptions)',
+      '1 round of design changes',
+      '3 months of support after launch',
+    ],
+  },
+  {
+    name: 'Pro',
+    price: '₹25,000',
+    bestFor: 'Best for businesses that want to be found and to stand out.',
+    color: '#ffd166',
+    featured: true,
+    features: [
+      'Everything in Growth',
+      'Google Maps and Google Business link-up',
+      'Extra pages: gallery, services, testimonials',
+      'Local search setup for your area, with structured data',
+      'Visitor analytics',
+      'Admin panel to edit your content, prices and photos yourself',
+      '2 rounds of design changes',
+      '3 months of support after launch',
+    ],
+  },
+  {
+    name: 'Premium',
+    price: '₹50,000',
+    bestFor: 'Best for businesses that want their website to handle bookings and payments.',
+    color: '#4cc9f0',
+    features: [
+      'Everything in Pro',
+      'Online booking (appointments, classes or orders)',
+      'Customer login area with their plans, bookings and history',
+      'Online payment links',
+      'Blog for tips and news',
+      'Monthly performance report',
+      '3 rounds of design changes',
+      '3 months of support after launch',
+    ],
+  },
+];
+
+/** The small print under the packages. */
+export const PRICING_NOTES: { title: string; body: string }[] = [
+  { title: 'Starting prices', body: 'The final price depends on things like the number of pages or special features. I confirm it in writing before we begin.' },
+  { title: 'Hosting & domain', body: 'Not included in any package. Charged at cost, yearly at the registrar’s rate. I tell you the exact amount first and set both up for you.' },
+  { title: 'Payment', body: '50% advance to start, the rest on launch.' },
+  { title: 'Ownership', body: 'The website and content are yours once the final payment is made. Extra changes are quoted first, never charged without your approval.' },
+];
+
 export type Faq = { q: string; a: string };
 
 /** TODO: adjust the answers (prices, timelines) to how you actually work. */
 export const FAQS: Faq[] = [
   {
     q: 'How much does a website cost?',
-    a: 'It depends on the size and features. After a short call you get a fixed quote, so you know the full price before any work starts.',
+    a: 'Packages start at ₹15,000 (see Pricing above). The final price depends on the pages and features you need, and you get it in writing before any work starts.',
   },
   {
     q: 'How long does it take?',

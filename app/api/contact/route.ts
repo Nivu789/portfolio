@@ -5,7 +5,7 @@ import { Resend } from 'resend';
  * visitor so you can answer straight from your inbox. Env vars: see .env.example.
  */
 
-const LIMITS = { name: 100, email: 200, company: 120, service: 80, message: 5000 };
+const LIMITS = { name: 100, email: 200, company: 120, service: 80, package: 40, message: 5000 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* best-effort per-IP throttle; resets whenever the server instance restarts */
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   if (typeof body.website === 'string' && body.website.trim()) return Response.json({ ok: true });
 
   const name = field(body, 'name'), email = field(body, 'email'), company = field(body, 'company');
-  const service = field(body, 'service'), message = field(body, 'message');
+  const service = field(body, 'service'), pkg = field(body, 'package'), message = field(body, 'message');
   if (!name || !EMAIL_RE.test(email) || message.length < 10) {
     return Response.json({ error: 'Please add your name, a valid email and a short message.' }, { status: 400 });
   }
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown';
   if (throttled(ip)) return Response.json({ error: 'Too many messages. Please try again in a few minutes.' }, { status: 429 });
 
-  const rows: [string, string][] = [['Name', name], ['Email', email], ['Company', company], ['Looking for', service]];
+  const rows: [string, string][] = [['Name', name], ['Email', email], ['Company', company], ['Package', pkg], ['Project type', service]];
   const text = rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join('\n') + `\n\n${message}`;
   const html =
     `<table style="font:14px/1.5 sans-serif;border-collapse:collapse">` +
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     from: process.env.CONTACT_FROM_EMAIL || 'Portfolio <onboarding@resend.dev>',
     to: to.split(',').map((s) => s.trim()),
     replyTo: email,
-    subject: `New enquiry from ${name}${service ? ` · ${service}` : ''}`,
+    subject: `New enquiry from ${name}${[pkg && `${pkg} package`, service].filter(Boolean).map((x) => ` · ${x}`).join('')}`,
     text,
     html,
   });

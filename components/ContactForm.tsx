@@ -1,13 +1,24 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
-import { CONTACT, SERVICES } from '@/lib/content';
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { CONTACT, PACKAGES, SERVICES } from '@/lib/content';
 
 type Status = { kind: 'idle' | 'sending' | 'sent' | 'error'; text?: string };
 
 /** The contact section's form. Posts to app/api/contact, which emails it to you through Resend. */
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
+  const formRef = useRef<HTMLFormElement>(null);
+
+  /* a pricing card's button pre-selects its package here */
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const radio = formRef.current?.querySelector<HTMLInputElement>(`input[name="package"][value="${(e as CustomEvent<string>).detail}"]`);
+      if (radio) radio.checked = true;
+    };
+    window.addEventListener('pick-package', onPick);
+    return () => window.removeEventListener('pick-package', onPick);
+  }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,7 +42,7 @@ export default function ContactForm() {
   const sending = status.kind === 'sending';
 
   return (
-    <form className="cform reveal" onSubmit={onSubmit}>
+    <form className="cform reveal" onSubmit={onSubmit} ref={formRef}>
       <div className="cform-row">
         <label className="cfield">
           <span>Name</span>
@@ -48,13 +59,28 @@ export default function ContactForm() {
           <input name="company" type="text" autoComplete="organization" maxLength={120} placeholder="Business or brand" />
         </label>
         <label className="cfield">
-          <span>Looking for</span>
+          <span>Project type</span>
           <select name="service" defaultValue="">
             <option value="">Not sure yet</option>
             {SERVICES.map((s) => <option key={s.title} value={s.title}>{s.title}</option>)}
           </select>
         </label>
       </div>
+      <fieldset className="cfield cpkg">
+        <legend>Package</legend>
+        <div className="cpkg-opts">
+          {PACKAGES.map((p) => (
+            <label key={p.name} style={{ '--c': p.color } as CSSProperties}>
+              <input type="radio" name="package" value={p.name} />
+              <span><b>{p.name}</b><small>from {p.price}</small></span>
+            </label>
+          ))}
+          <label>
+            <input type="radio" name="package" value="" defaultChecked />
+            <span><b>Not sure</b><small>help me choose</small></span>
+          </label>
+        </div>
+      </fieldset>
       <label className="cfield">
         <span>Project details</span>
         <textarea
